@@ -17,6 +17,6 @@ EXPOSE 8554
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 
-RUN gcc -g -O2 -Wall `pkg-config --cflags --libs gstreamer-rtsp-server gssdp-1.0` RpiCameraRtspServer.c -o RpiCameraRtspServer
+RUN gcc -g -O2 -Wall `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gssdp-1.0` RpiCameraRtspServer.c -o RpiCameraRtspServer
 
 CMD ["bash", "start.sh"]
