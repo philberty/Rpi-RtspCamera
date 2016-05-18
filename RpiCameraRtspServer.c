@@ -35,9 +35,11 @@ int main(int argc, char **argv)
 
     GstRTSPMediaFactory *factory = gst_rtsp_media_factory_new();
     gst_rtsp_media_factory_set_launch(factory,
-                                      "( v4l2src device=/dev/video0 ! omxh264enc "
+                                      "( v4l2src device=/dev/video0 "
+                                      "! omxh264enc "
                                       "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
-                                      "! h264parse ! rtph264pay name=pay0 config-interval=1 pt=96 )");
+                                      "! h264parse "
+                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");
 
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
     g_object_unref(mounts);
