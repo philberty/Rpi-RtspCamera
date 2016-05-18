@@ -5,6 +5,24 @@
 
 #include <stdlib.h>
 
+static
+gboolean timeout(GstRTSPServer * server, gboolean ignored)
+{
+    GstRTSPSessionPool *pool;
+    
+    pool = gst_rtsp_server_get_session_pool(server);
+    gst_rtsp_session_pool_cleanup(pool);
+    g_object_unref(pool);
+
+    return TRUE;
+}
+
+static
+void media_configure(GstRTSPMediaFactory * factory, GstRTSPMedia * media)
+{
+    gst_rtsp_media_set_reusable(media, TRUE);
+}
+
 int main(int argc, char **argv)
 {
 #if !GLIB_CHECK_VERSION (2, 35, 0)
@@ -40,20 +58,24 @@ int main(int argc, char **argv)
                                       "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
                                       "! h264parse "
                                       "! rtph264pay name=pay0 config-interval=1 pt=96 )");
+    gst_rtsp_media_factory_set_shared(factory, TRUE);
+    g_signal_connect(factory, "media-configure", (GCallback)media_configure, NULL);
 
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
     g_object_unref(mounts);
 
     gst_rtsp_server_attach(server, NULL);
+    g_timeout_add_seconds(5, (GSourceFunc) timeout, server);
 
     /* start serving */
-    g_print("stream ready at rtsp://127.0.0.1:8554/camera\n");
+    g_print("stream ready at rtsp://0.0.0.0:8554/camera\n");
     g_main_loop_run(loop);
 
     // done
     g_main_loop_unref(loop);
-    g_object_unref(resource_group);
-    g_object_unref(client);
+
+    /*g_object_unref(resource_group);
+    g_object_unref(client);*/
     
     return 0;
 }
