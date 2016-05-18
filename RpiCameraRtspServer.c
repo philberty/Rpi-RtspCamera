@@ -1,71 +1,57 @@
-/* GStreamer
- * Copyright (C) 2008 Wim Taymans <wim.taymans at gmail.com>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
+#include <libgssdp/gssdp.h>
+#include <gio/gio.h>
 #include <gst/gst.h>
-
 #include <gst/rtsp-server/rtsp-server.h>
 
-int
-main (int argc, char *argv[])
+#include <stdlib.h>
+
+int main(int argc, char **argv)
 {
-  GMainLoop *loop;
-  GstRTSPServer *server;
-  GstRTSPMountPoints *mounts;
-  GstRTSPMediaFactory *factory;
+#if !GLIB_CHECK_VERSION (2, 35, 0)
+    g_type_init ();
+#endif
+    
+    gst_init(&argc, &argv);
 
-  gst_init (&argc, &argv);
+    GError *error;
+    GSSDPClient *client = g_initable_new(GSSDP_TYPE_CLIENT, NULL, &error, NULL);
+    if (error) {
+        g_printerr("Error creating the GSSDP client: %s\n", error->message);
+        g_error_free(error);
+        return EXIT_FAILURE;
+    }
 
-  if (argc < 2) {
-    g_print ("usage: %s <launch line> \n"
-        "example: %s \"( videotestsrc ! x264enc ! rtph264pay name=pay0 pt=96 )\"\n",
-        argv[0], argv[0]);
-    return -1;
-  }
+    GSSDPResourceGroup *resource_group = gssdp_resource_group_new (client);
+    gssdp_resource_group_add_resource_simple
+        (resource_group,
+         "upnp:rootdevice",
+         "uuid:1234abcd-12ab-12ab-12ab-1234567abc12::upnp:rootdevice",
+         "http://192.168.1.100/");
+    gssdp_resource_group_set_available(resource_group, TRUE);
 
-  loop = g_main_loop_new (NULL, FALSE);
+    GMainLoop *loop = g_main_loop_new(NULL, FALSE);
+    GstRTSPServer *server = gst_rtsp_server_new();
+    GstRTSPMountPoints *mounts = gst_rtsp_server_get_mount_points(server);
 
-  /* create a server instance */
-  server = gst_rtsp_server_new ();
+    GstRTSPMediaFactory *factory = gst_rtsp_media_factory_new();
+    gst_rtsp_media_factory_set_launch(factory,
+                                      "( v4l2src device=/dev/video0 ! omxh264enc "
+                                      "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
+                                      "! h264parse ! rtph264pay name=pay0 config-interval=1 pt=96 )");
 
-  /* get the mount points for this server, every server has a default object
-   * that be used to map uri mount points to media factories */
-  mounts = gst_rtsp_server_get_mount_points (server);
+    gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
+    g_object_unref(mounts);
 
-  /* make a media factory for a test stream. The default media factory can use
-   * gst-launch syntax to create pipelines.
-   * any launch line works as long as it contains elements named pay%d. Each
-   * element with pay%d names will be a stream */
-  factory = gst_rtsp_media_factory_new ();
-  gst_rtsp_media_factory_set_launch (factory, argv[1]);
+    gst_rtsp_server_attach(server, NULL);
 
-  /* attach the test factory to the /test url */
-  gst_rtsp_mount_points_add_factory (mounts, "/test", factory);
+    /* start serving */
+    g_print("stream ready at rtsp://127.0.0.1:8554/camera\n");
+    g_main_loop_run(loop);
 
-  /* don't need the ref to the mapper anymore */
-  g_object_unref (mounts);
-
-  /* attach the server to the default maincontext */
-  gst_rtsp_server_attach (server, NULL);
-
-  /* start serving */
-  g_print ("stream ready at rtsp://127.0.0.1:8554/test\n");
-  g_main_loop_run (loop);
-
-  return 0;
+    // done
+    g_main_loop_unref(loop);
+    g_object_unref(resource_group);
+    g_object_unref(client);
+    
+    return 0;
 }
