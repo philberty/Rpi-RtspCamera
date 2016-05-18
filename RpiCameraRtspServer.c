@@ -58,8 +58,8 @@ int main(int argc, char **argv)
                                       "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
                                       "! h264parse "
                                       "! rtph264pay name=pay0 config-interval=1 pt=96 )");
-    gst_rtsp_media_factory_set_shared(factory, TRUE);
-    g_signal_connect(factory, "media-configure", (GCallback)media_configure, NULL);
+    //gst_rtsp_media_factory_set_shared(factory, TRUE);
+    //g_signal_connect(factory, "media-configure", (GCallback)media_configure, NULL);
 
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
     g_object_unref(mounts);
