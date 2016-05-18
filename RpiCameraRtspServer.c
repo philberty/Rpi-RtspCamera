@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     
     gst_init(&argc, &argv);
 
-    GError *error;
+    /*GError *error;
     GSSDPClient *client = g_initable_new(GSSDP_TYPE_CLIENT, NULL, &error, NULL);
     if (error) {
         g_printerr("Error creating the GSSDP client: %s\n", error->message);
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
          "upnp:rootdevice",
          "uuid:1234abcd-12ab-12ab-12ab-1234567abc12::upnp:rootdevice",
          "http://192.168.1.100/");
-    gssdp_resource_group_set_available(resource_group, TRUE);
+         gssdp_resource_group_set_available(resource_group, TRUE);*/
 
     GMainLoop *loop = g_main_loop_new(NULL, FALSE);
     GstRTSPServer *server = gst_rtsp_server_new();
