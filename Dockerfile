@@ -18,5 +18,6 @@ COPY . /usr/src/app
 WORKDIR /usr/src/app
 
 RUN gcc -g -O2 -Wall `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gssdp-1.0` RpiCameraRtspServer.c -o RpiCameraRtspServer
+RUN bash -c "echo bcm2835-v4l2 >> /etc/modules"
 
 CMD ["bash", "start.sh"]
