@@ -1,90 +1,34 @@
-#include <libgssdp/gssdp.h>
-#include <gio/gio.h>
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 
-#include <stdlib.h>
-
-static
-gboolean timeout(GstRTSPServer * server, gboolean ignored)
-{
-    GstRTSPSessionPool *pool;
-    
-    pool = gst_rtsp_server_get_session_pool(server);
-    gst_rtsp_session_pool_cleanup(pool);
-    g_object_unref(pool);
-
-    return TRUE;
-}
-
-static
-void media_configure(GstRTSPMediaFactory * factory, GstRTSPMedia * media)
-{
-    gst_rtsp_media_set_reusable(media, TRUE);
-}
-
 int main(int argc, char **argv)
-{
-#if !GLIB_CHECK_VERSION (2, 35, 0)
-    g_type_init ();
-#endif
-    
+{    
     gst_init(&argc, &argv);
-
-    /*GError *error;
-    GSSDPClient *client = g_initable_new(GSSDP_TYPE_CLIENT, NULL, &error, NULL);
-    if (error) {
-        g_printerr("Error creating the GSSDP client: %s\n", error->message);
-        g_error_free(error);
-        return EXIT_FAILURE;
-    }
-
-    GSSDPResourceGroup *resource_group = gssdp_resource_group_new (client);
-    gssdp_resource_group_add_resource_simple
-        (resource_group,
-         "upnp:rootdevice",
-         "uuid:1234abcd-12ab-12ab-12ab-1234567abc12::upnp:rootdevice",
-         "http://192.168.1.100/");
-         gssdp_resource_group_set_available(resource_group, TRUE);*/
 
     GMainLoop *loop = g_main_loop_new(NULL, FALSE);
     GstRTSPServer *server = gst_rtsp_server_new();
     GstRTSPMountPoints *mounts = gst_rtsp_server_get_mount_points(server);
 
     GstRTSPMediaFactory *factory = gst_rtsp_media_factory_new();
-    /*gst_rtsp_media_factory_set_launch(factory,
-                                      "( v4l2src device=/dev/video0 "
+    gst_rtsp_media_factory_set_launch(factory,
+                                      "( videotestsrc "
                                       "! omxh264enc "
                                       "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
                                       "! h264parse "
-                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");*/
-
-    gst_rtsp_media_factory_set_launch(factory,
-				      "( v4l2src device=/dev/video0 extra-controls=\"c,video_bitrate=8000000\" "
-				      "! video/x-raw, width=720, height=480, framerate=25/1 "
-				      "! videoconvert "
-				      "! avenc_mpeg4 "
-				      "! rtpmp4vpay name=pay0 config-interval=1 pt=96 )");
-
-    
-    //gst_rtsp_media_factory_set_shared(factory, TRUE);
-    //g_signal_connect(factory, "media-configure", (GCallback)media_configure, NULL);
+                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");    
 
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
     g_object_unref(mounts);
 
     gst_rtsp_server_attach(server, NULL);
-    // g_timeout_add_seconds(5, (GSourceFunc) timeout, server);
 
-    /* start serving */
-    g_print("stream ready at rtsp://0.0.0.0:8554/camera\n");
+    int server_port = gst_rtsp_server_get_bound_port(server);
+    g_char *server_addr = gst_rtsp_server_get_address(server);
+    
+    g_print("stream ready at rtsp://%s:%i/camera\n", server_addr, server_port);
     g_main_loop_run(loop);
 
-    // done
     g_main_loop_unref(loop);
-
-    /*g_object_unref(resource_group);
-    g_object_unref(client);*/
     
     return 0;
 }
