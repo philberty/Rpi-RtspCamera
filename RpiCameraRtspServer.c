@@ -1,7 +1,10 @@
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
+#include <libgssdp/gssdp.h>
+#include <gio/gio.h>
+#include <stdlib.h>
 
-#define VERSION 1
+#define VERSION 2
 
 int main(int argc, char **argv)
 {    
