@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     gst_rtsp_server_attach(server, NULL);
 
     int server_port = gst_rtsp_server_get_bound_port(server);
-    g_char *server_addr = gst_rtsp_server_get_address(server);
+    gchar *server_addr = gst_rtsp_server_get_address(server);
     
     g_print("stream ready at rtsp://%s:%i/camera\n", server_addr, server_port);
     g_main_loop_run(loop);
