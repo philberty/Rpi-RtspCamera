@@ -1,6 +1,8 @@
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 
+#define VERSION 1
+
 int main(int argc, char **argv)
 {    
     gst_init(&argc, &argv);
@@ -25,7 +27,7 @@ int main(int argc, char **argv)
     int server_port = gst_rtsp_server_get_bound_port(server);
     gchar *server_addr = gst_rtsp_server_get_address(server);
     
-    g_print("stream ready at rtsp://%s:%i/camera\n", server_addr, server_port);
+    g_print("RTSP %i - stream ready at rtsp://%s:%i/camera\n", VERSION, server_addr, server_port);
     g_main_loop_run(loop);
 
     g_main_loop_unref(loop);
