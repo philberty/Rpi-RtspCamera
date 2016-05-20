@@ -4,7 +4,7 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 
-#define VERSION 2
+#define VERSION 3
 
 int main(int argc, char **argv)
 {    
@@ -15,12 +15,17 @@ int main(int argc, char **argv)
     GstRTSPMountPoints *mounts = gst_rtsp_server_get_mount_points(server);
 
     GstRTSPMediaFactory *factory = gst_rtsp_media_factory_new();
-    gst_rtsp_media_factory_set_launch(factory,
+    /*gst_rtsp_media_factory_set_launch(factory,
                                       "( videotestsrc "
                                       "! omxh264enc "
                                       "! video/x-h264,width=720,height=480,framerate=25/1,profile=high,target-bitrate=8000000 "
                                       "! h264parse "
-                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");    
+                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");*/
+
+    gst_rtsp_media_factory_set_launch(factory,
+                                      "( rpicamsrc bitrate=1000000 "
+                                      "! h264parse "
+                                      "! rtph264pay name=pay0 config-interval=1 pt=96 )");
 
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
     g_object_unref(mounts);
