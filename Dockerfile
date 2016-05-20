@@ -1,4 +1,4 @@
-FROM resin/rpi-raspbian
+FROM resin/rpi-raspbian:jessie
 
 MAINTAINER Philip Herron <herron.philip@googlemail.com>
 
