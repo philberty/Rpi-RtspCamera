@@ -6,7 +6,6 @@ RUN apt-get update; \
     apt-get install -y libraspberrypi-bin gstreamer1.0 gstreamer1.0-tools gstreamer1.0-omx \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-tools \
     libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-good libgssdp-1.0-dev \
-    libgstreamer-plugins-good-dev libgstreamer-plugins-bad-dev \
     v4l-utils wget ca-certificates build-essential git autoconf automake libtool
 RUN apt-get upgrade
 
