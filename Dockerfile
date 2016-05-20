@@ -2,13 +2,18 @@ FROM resin/rpi-raspbian:jessie
 
 MAINTAINER Philip Herron <herron.philip@googlemail.com>
 
-RUN apt-get update; apt-get install libraspberrypi-bin gstreamer1.0 gstreamer1.0-tools gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-tools libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-good libgssdp-1.0-dev v4l-utils wget ca-certificates build-essential
+RUN apt-get update; \
+    apt-get install -y libraspberrypi-bin gstreamer1.0 gstreamer1.0-tools gstreamer1.0-omx \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-tools \
+    libgstreamer-plugins-base1.0-0 gstreamer1.0-plugins-good libgssdp-1.0-dev \
+    libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev \
+    v4l-utils wget ca-certificates build-essential
 RUN apt-get upgrade
 
 RUN wget https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-1.4.4.tar.xz
-RUN tar xvf gst-rtsp-server-1.4.4.tar.xz; cd gst-rtsp-server-1.4.4; ./configure --prefix=/opt; make; make install; cd ..
+RUN tar xvf gst-rtsp-server-1.4.4.tar.xz; cd gst-rtsp-server-1.4.4; ./configure --prefix=/usr; make; make install; cd ..
 
-ENV PKG_CONFIG_PATH /opt/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH
+ENV PKG_CONFIG_PATH /usr/lib/pkgconfig:$PKG_CONFIG_PATH
 ENV LD_LIBRARY_PATH /opt/lib:$LD_LIBRARY_PATH
 ENV PATH /opt/vc/bin:$PATH
 ENV INITSYSTEM on
@@ -19,6 +24,6 @@ COPY . /usr/src/app
 WORKDIR /usr/src/app
 
 RUN gcc -g -O2 -Wall `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gssdp-1.0` RpiCameraRtspServer.c -o RpiCameraRtspServer
-# RUN bash -c "echo bcm2835-v4l2 >> /etc/modules"
+RUN bash -c "echo bcm2835-v4l2 >> /etc/modules"
 
 CMD ["bash", "start.sh"]
