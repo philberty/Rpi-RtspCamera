@@ -37,8 +37,8 @@ int main(int argc, char **argv)
     GstRTSPMountPoints *mounts = gst_rtsp_server_get_mount_points(server);
     GstRTSPMediaFactory *factory = gst_rtsp_media_factory_new();
     gst_rtsp_media_factory_set_launch(factory,
-                                      "( videotestsrc "
-                                      "! x264enc "
+                                      "( rpicamsrc bitrate=5000000 "
+                                      "! h264parse "
                                       "! rtph264pay name=pay0 config-interval=1 pt=96 )");
     gst_rtsp_media_factory_set_shared(factory, TRUE);
     gst_rtsp_mount_points_add_factory(mounts, "/camera", factory);
