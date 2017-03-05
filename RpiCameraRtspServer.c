@@ -8,6 +8,26 @@
 #include <unistd.h>
 #include <string.h>
 
+static gboolean
+remove_func (GstRTSPSessionPool * pool, GstRTSPSession * session,
+    GstRTSPServer * server)
+{
+  return GST_RTSP_FILTER_REMOVE;
+}
+
+static gboolean
+remove_sessions (GstRTSPServer * server)
+{
+  GstRTSPSessionPool *pool;
+
+  g_print ("removing all sessions\n");
+  pool = gst_rtsp_server_get_session_pool (server);
+  gst_rtsp_session_pool_filter (pool,
+      (GstRTSPSessionPoolFilterFunc) remove_func, server);
+  g_object_unref (pool);
+
+  return FALSE;
+}
 
 /* this timeout is periodically run to clean up the expired sessions from the
  * pool. This needs to be run explicitly currently but might be done
@@ -52,6 +72,7 @@ int main(int argc, char **argv)
 
     /* add a timeout for the session cleanup */
     g_timeout_add_seconds (2, (GSourceFunc) timeout, server);
+    g_timeout_add_seconds (10, (GSourceFunc) remove_sessions, server);
 
     int server_port = gst_rtsp_server_get_bound_port(server);
     gchar *server_addr = gst_rtsp_server_get_address(server);
