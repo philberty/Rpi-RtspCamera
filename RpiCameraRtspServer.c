@@ -71,8 +71,8 @@ int main(int argc, char **argv)
     }
 
     /* add a timeout for the session cleanup */
-    g_timeout_add_seconds (2, (GSourceFunc) timeout, server);
-    g_timeout_add_seconds (10, (GSourceFunc) remove_sessions, server);
+    // g_timeout_add_seconds (2, (GSourceFunc) timeout, server);
+    // g_timeout_add_seconds (10, (GSourceFunc) remove_sessions, server);
 
     int server_port = gst_rtsp_server_get_bound_port(server);
     gchar *server_addr = gst_rtsp_server_get_address(server);
